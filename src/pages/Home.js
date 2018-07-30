@@ -1,18 +1,15 @@
 import React, { Component } from 'react'
 import {
-  View,
-  Text,
+  ScrollView,
   StyleSheet,
 } from 'react-native'
+import { List, Button } from 'antd-mobile-rn'
 
 export default class Home extends Component {
   static navigationOptions = {
     headerTitle: 'Realm React Native',
-    headerStyle: {
-      backgroundColor: 'rgb(85, 163, 223)',
-    },
-    headerTintColor: 'rgb(255,255,255)',
   }
+
   constructor(props) {
     super(props)
     this.state = {}
@@ -21,10 +18,19 @@ export default class Home extends Component {
   componentDidMount() {}
 
   render() {
+    const { navigation } = this.props
     return (
-      <View style={styles.container}>
-        <Text>I am the Home component</Text>
-      </View>
+      <ScrollView style={styles.container}>
+        {/* <List>
+          <Item
+            arrow="horizontal"
+            onClick={() => this.props.navigation.navigate('Dog')}
+          >
+            标题文字
+            <Brief>辅助文字内容</Brief>
+          </Item>
+        </List> */}
+      </ScrollView>
     )
   }
 }

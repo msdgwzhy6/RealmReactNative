@@ -1,9 +1,10 @@
 import React from 'react'
 import { createStackNavigator } from 'react-navigation'
-import Home from './src/pages/Home'
+import routes from './config/routes'
+
 const HomeStack = createStackNavigator(
   {
-    Home
+    ...routes,
   },
   {
     initialRouteName: 'Home',
