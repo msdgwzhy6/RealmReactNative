@@ -4,7 +4,15 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest",
+    "debug": "react-native run-android",
+    "assembleRelease": "cd android && gradlew assembleRelease",
+    "installRelease": "cd android && gradlew installRelease",
+    "clean": "cd android && gradlew clean",
+    "keygen": "keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000",
+    "key-debug": "keytool -list -v -keystore C:/Users/youngjuning/.android/debug.keystore",
+    "key-release": "keytool -v -list -keystore  ./android/app/my-release-key.keystore",
+    "debug-ios": "react-native run-ios"
   },
   "dependencies": {
     "react": "16.3.1",
