@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import {
   ScrollView,
-  StyleSheet,
 } from 'react-native'
-import { List, Button } from 'antd-mobile-rn'
+import { List } from 'antd-mobile-rn'
+
+const Item = List.Item
+const Brief = List.Item.Brief
 
 export default class Home extends Component {
   static navigationOptions = {
@@ -20,23 +22,17 @@ export default class Home extends Component {
   render() {
     const { navigation } = this.props
     return (
-      <ScrollView style={styles.container}>
-        {/* <List>
+      <ScrollView>
+        <List>
           <Item
             arrow="horizontal"
-            onClick={() => this.props.navigation.navigate('Dog')}
+            onClick={() => navigation.navigate('Dog')}
           >
-            标题文字
-            <Brief>辅助文字内容</Brief>
+            Realm 中有几只狗
+            <Brief>Realm 第一个Demo</Brief>
           </Item>
-        </List> */}
+        </List>
       </ScrollView>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-})
