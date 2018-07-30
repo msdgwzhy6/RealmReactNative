@@ -4,27 +4,17 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs",
-    "debug": "react-native run-android",
-    "debug-ios": "react-native run-ios",
-    "assembleRelease": "cd android && gradlew assembleRelease",
-    "installRelease": "cd android && gradlew installRelease",
-    "clean": "cd android && gradlew clean",
-    "keygen": "keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000",
-    "key-debug": "keytool -list -v -keystore C:/Users/youngjuning/.android/debug.keystore",
-    "key-release": "keytool -v -list -keystore  ./android/app/my-release-key.keystore"
+    "test": "jest"
   },
   "dependencies": {
-    "react": "16.4.1",
-    "react-native": "0.56.0"
+    "react": "16.3.1",
+    "react-native": "0.55.4"
   },
   "devDependencies": {
     "babel-jest": "23.4.2",
-    "babel-preset-react-native": "5",
+    "babel-preset-react-native": "4.0.0",
     "jest": "23.4.2",
-    "react-test-renderer": "16.4.1"
+    "react-test-renderer": "16.3.1"
   },
   "jest": {
     "preset": "react-native"
