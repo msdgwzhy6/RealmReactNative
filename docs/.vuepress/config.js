@@ -1,6 +1,6 @@
 module.exports = {
-  base: '/realmRNDemo/',
-  title: 'realmRNDemo',
+  base: '/RealmReactNative/',
+  title: 'Realm React Native',
   description: 'realm react native 中文文档',
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
