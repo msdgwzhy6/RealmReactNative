@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import {
   View,
-  Text,
   StyleSheet,
 } from 'react-native'
 import Realm from 'realm'
@@ -43,9 +42,8 @@ export default class DogSchemaScreen extends Component {
     const { navigation } = this.props
     return (
       <View style={styles.container}>
-        <Text>{info}</Text>
         <Button type="primary" size="large" onClick={() => { navigation.goBack() }}>
-          退出再进入，就会多一只狗！！！
+          {info}
         </Button>
       </View>
     )

@@ -31,6 +31,13 @@ export default class Home extends Component {
             Realm 中有几只狗
             <Brief>Realm 第一个Demo</Brief>
           </Item>
+          <Item
+            arrow="horizontal"
+            onClick={() => navigation.navigate('Car')}
+          >
+            Realm 中有几只狗
+            <Brief>Realm 第一个Demo</Brief>
+          </Item>
         </List>
       </ScrollView>
     )

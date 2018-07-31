@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
 } from 'react-native'
-import Realm from 'realm'
 import RealmHelp from '../common/RealmHelp'
 
 // 定义模型和它们的属性
