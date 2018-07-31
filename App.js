@@ -1,6 +1,6 @@
 import React from 'react'
 import { createStackNavigator } from 'react-navigation'
-import routes from './config/routes'
+import routes from './src/config/routes'
 
 const HomeStack = createStackNavigator(
   {
