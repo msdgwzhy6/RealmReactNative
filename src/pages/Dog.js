@@ -32,7 +32,9 @@ export default class DogSchemaScreen extends Component {
       realm.write(() => {
         realm.create('Dog', { name: 'Rex'})
       })
-      this.setState({realm})
+      this.setState({realm}, () => {
+        realm.close()
+      })
     })
   }
 
