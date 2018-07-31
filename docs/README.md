@@ -336,3 +336,226 @@ realm.write(/* ... */)
 ::: warning
 如果 Realm 的 [permissions](http://t.cn/Rel13kK) 是 `read-only`，那么你必须使用异步的API来打开它。使用上面的语法打开 `read-only` Realm 将会导致错误。
 :::
+
+## Models - 模型
+
+Realm 数据模型由初始化期间传递到 Realm 的 schema 信息所定义。一个对象的 schema 由 `name` 和一些属性组成。要么每一个属性都有一个 `name`，并由一个包含属性类型的字符串描述,要么是一个包含 `name`,`type`,`objectType`,`optional`,`default` 和 `indexed` 字段的对象。
+
+```js
+const Realm = require('realm');
+
+const CarSchema = {
+  name: 'Car',
+  properties: {
+    make:  'string',
+    model: 'string',
+    miles: {type: 'int', default: 0},
+  }
+};
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    name:     'string',
+    birthday: 'date',
+    cars:     'Car[]'
+    picture:  'data?', // 可选的属性
+  }
+};
+
+// Initialize a Realm with Car and Person models
+Realm.open({schema: [CarSchema, PersonSchema]}).then(realm => {
+  // ... use the realm instance to read and modify data
+})
+```
+
+### 类
+
+::: tips
+在这里，通过类来定义模型是被限制的。 它在 React Native 环境下下可以工作，但是在 Node 环境不行。
+:::
+
+如果你想要使用 ES2015 类（并且可能希望继承已经存在的特性），你只需要在构造器中定义 schema：
+
+```js
+class Person {
+  get fullName() {
+    return this.firstName + ' ' + this.lastName
+  }
+}
+Person.schema = {
+  name: 'Person',
+  properties: {
+    firstName: 'string',
+    lastName: 'string'
+  }
+}
+```
+
+你现在可以把类本身传递给 open configuration 的 `shema` 属性：
+
+```js
+Realm.open({schema: [Person]}).then(/* ... */)
+```
+
+你可以一如既往地访问属性：
+
+```js
+realm.write(() => {
+  const john = realm.create('Person', {
+    firstName: 'John',
+    lastName: 'Smith'
+  });
+  john.lastName = 'Peterson';
+  console.log(john.fullName); // -> 'John Peterson'
+})
+```
+
+### 支持的类型
+
+Reamlm 支持一下基本的类型： `bool`，`int`，`float`，`double`，`string`，`data` 和 `date`。
+
+- `bool` 相当于 JavaScript的 `boolean` 类型
+- `int`，`float` 和 `double` 属性相当于 JavaScript 的 `number` 类型。`int` 和 `double` 被存储为64位， `float` 被存储为32位
+- `string` 属性相当于 JavaScript 的 `string` 类型
+- `data` 属性相当于 JavaScript 的 `ArrayBuffer` 类型
+- `date` 属性相当于 JavaScript 的 `date` 类型
+
+当简写一个基本属性时，你可以只指定类型：
+
+```js
+const CarSchema = {
+  name: 'Car',
+  properties: {
+    // The following property types are equivalent
+    make:   {type: 'string'},
+    model: 'string',
+  }
+}
+```
+
+#### 可选的属性
+
+默认地，基本类型不是必需的并且不能存储 `null` 和 `undefined`。在你定义属性时，属性可以通过指定一个 `optional` 代号变成可选的。或者使用简写符号：给类型名追加一个 `?`：
+
+```js
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    realName:    'string', // 必需属性
+    displayName: 'string?', // 可选属性
+    birthday:    {type: 'date', optional: true}, // 可选属性
+  }
+};
+
+let realm = new Realm({schema: [PersonSchema, CarSchema]})
+
+realm.write(() => {
+  // 可选属性在创建的时候可以被设置为 null 或 undefined
+  let charlie = realm.create('Person', {
+    realName: 'Charlie',
+    displayName: null, // 也可以完全被省略
+    birthday: new Date(1995, 11, 25),
+  });
+
+  // 可以属性可以被设置为 null、undefined，或者被设置为一个新的非空值
+  charlie.birthday = undefined
+  charlie.displayName = 'Charles'
+
+  // 设置一个非可选的属性为null将抛出类型错误
+  // charlie.realName = null
+});
+```
+
+#### 列表属性
+
+除了存储单独的值，属性也可以被声明为一个包含任何支持的基本类型的列表。只需要给类型名追加 `[]`：
+
+```js
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    name: 'string',
+    testScores: 'double?[]'
+  }
+}
+
+Realm.open({
+  schema: [PersonSchema, CarSchema]
+}).then((realm) => {
+  realm.write(() => {
+    let charlie = realm.create('Person',{
+      name: 'Charlie',
+      testScores: [100.0]
+    })
+    // Charlie 在第二次测试时缺考了，所以允许跳过
+    charlie.testScores.push(null)
+
+    // 之后第三次考试成绩不理想
+    charlie.testScores.push(70.0)
+  })
+})
+```
+
+当访问列表属性会返回一个 `List` 对象。 `List` 对象的方法和 JavaScript 的数组方法非常像。最大的不同是任何改变都会被持久化到底层的 Realm，并且它们只能在 write 操作中被修改。另外， `List` 对象是从基础对象中获取的，你只能通过访问用该属性的对象访问，而不能手动创建。
+
+虽然list属性中的值可以是可选的，但list属性本身不能。给 list 属性指定 `optional` 将会把 list 中的值变成可选的
+
+## Relationships - 关系
+
+::: warning
+暂无
+:::
+
+## 故障排除
+
+### Missing Realm Constructor
+
+如果你的 app 崩溃了，并且告诉你 `Realm constructor was not found`,你可以试试下面的方法
+
+首先执行 `react-native link realm`，如果还是没有帮助，那么你的问题是因为安卓，试试：
+
+把 `java import io.realm.react.RealmReactPackage;` 加入你的 `MainApplication.java` 文件
+
+添加 `RealmReactPackage` 到包列表中：
+
+```java
+protected List getPackages() {
+  return Arrays.asList(
+    new MainReactPackage(),
+    new RealmReactPackage() // add this line
+  );
+}
+```
+
+把下面的两行加到 `settings.gradle`：
+
+```js
+include ':realm'
+project(':realm').projectDir = new File(settingsDir, '../node_modules/realm/android')
+```
+
+如果你的问题是IOS，那么试试：
+
+1. 关闭所有模拟器/设备构建
+2. 停止在终端中运行的程序包管理器（或者更好的是，只需重新启动终端）
+3. 在查找程序中打开应用程序根目录中的ios文件夹。
+4. 进入构建文件夹（注意：你不会在atom中看到这个构建文件夹，所以只需右键单击ios并在finder中单击open）
+5. 删除构建文件夹内的所有内容（只需移动到垃圾箱并保留垃圾）
+6. 运行 `react-native run-ios` 重新构建
+
+### Cannot download realm-sync-cocoa
+
+我们已经看到一些报告，由于下载问题，用户无法构建他们的应用程序。症状是您看到类似的错误消息 `Error: unexpected end of file at Zlib.zlibOnError [as onerror] (zlib.js:142:17) errno: -5, code: 'Z_BUF_ERROR' }.`
+
+可以手动下载所需的文件，然后构建应用程序。步骤是：
+
+1. 找到您的项目目录，然后找到 `node_modules/realm/vendor/realm-ios`。它会是空的。
+2. 使用以下命令创建文件 `download-realm.lock` : `echo SYNC_SERVER_FOLDER=sync SYNC_ARCHIVE=realm-sync-cocoa-3.7.0.tar.gz SYNC_ARCHIVE_ROOT=core > download-realm.lock`。版本号（此处为3.7.0）必须与更改日志中的Realm Sync版本匹配。
+3. 找到下载的文件`realm-sync-cocoa-3.7.0.tar.gz`， 执行命令 `tar -xzvf realm-sync-cocoa-3.7.0.tar.gz -C yourProjectDirectory/node_modules/realm/vendor/realm-ios`.
+4. 你会发现该目录不再是空的。复制目录下的所有文件core并将其粘贴到目录下 `yourProjectDirectory/node_modules/realm/vendor/realm-ios`.
+
+### 崩溃报告
+
+我们鼓励您在应用程序中使用崩溃报告器。许多Realm操作可能在运行时失败（与任何其他磁盘IO一样），因此从应用程序收集崩溃报告将有助于确定您（或我们）可以改进错误处理和修复崩溃错误的区域。
+
+大多数商业崩溃记者都可以选择收集日志。我们强烈建议您启用此功能。在抛出异常和不可恢复的情况时，Realm会记录元数据信息（但没有用户数据），这些消息可以在出现问题时帮助调试。
