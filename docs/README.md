@@ -337,9 +337,9 @@ realm.write(/* ... */)
 如果 Realm 的 [permissions](http://t.cn/Rel13kK) 是 `read-only`，那么你必须使用异步的API来打开它。使用上面的语法打开 `read-only` Realm 将会导致错误。
 :::
 
-## Models - 模型
+## 模型
 
-Realm 数据模型由初始化期间传递到 Realm 的 schema 信息所定义。一个对象的 schema 由 `name` 和一些属性组成。要么每一个属性都有一个 `name`，并由一个包含属性类型的字符串描述,要么是一个包含 `name`,`type`,`objectType`,`optional`,`default` 和 `indexed` 字段的对象。
+Realm 数据模型由初始化期间传递到 Realm 的 schema 信息所定义。一个对象的 schema 由 `name` 和一些属性组成。要么每一个属性都有一个 `name`，并由一个包含属性类型的字符串描述。要么是一个包含 `name`,`type`,`objectType`,`optional`,`default` 和 `indexed` 字段的对象。
 
 ```js
 const Realm = require('realm');
@@ -500,7 +500,7 @@ Realm.open({
 
 虽然list属性中的值可以是可选的，但list属性本身不能。给 list 属性指定 `optional` 将会把 list 中的值变成可选的
 
-### Relationships - 关系
+### 关系
 
 #### 一对一
 
