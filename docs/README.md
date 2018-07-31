@@ -370,7 +370,7 @@ Realm.open({schema: [CarSchema, PersonSchema]}).then(realm => {
 
 ### 类
 
-::: tips
+::: tip
 在这里，通过类来定义模型是被限制的。 它在 React Native 环境下下可以工作，但是在 Node 环境不行。
 :::
 
@@ -500,11 +500,136 @@ Realm.open({
 
 虽然list属性中的值可以是可选的，但list属性本身不能。给 list 属性指定 `optional` 将会把 list 中的值变成可选的
 
-## Relationships - 关系
+### Relationships - 关系
 
-::: warning
-暂无
+#### 一对一
+
+对于一对一关系，你可以将指定的对象的模式的 `name`作为属性的类型：
+
+```js
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    // 下面的属性定义是等价的
+    car: {type: 'Car'},
+    van: 'Car',
+  }
+}
+```
+
+当使用对象属性时，你需要确保所有引用的类型存在于用于打开 Realm 的模式中：
+
+```js
+// 尽管 PersonSchema 中包含属性类型 `Car`， CarSchemas 还是必需的
+Realm.open({schema: [CarSchema, PersonSchema]}).then(/* ... */)
+```
+
+访问对象属性时，可以使用常规属性语法访问嵌套属性：
+
+```js
+realm.write(() => {
+  const nameString = person.car.name
+  person.car.miles = 1100
+
+  // 创建一个新的 Car
+  person.van = {make: 'Ford', model: 'Transit'}
+
+  // 设置两个属性为相同的汽车实例
+  person.car = person.van
+});
+```
+
+在Realm中对象属性总是可选的，不需要明确指定，并且不能被设置为必需的。
+
+
+#### 一对多
+
+与基本属性一样，你也可以使用对象列表来形成多对多关系：
+
+```js
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    cars: {type: 'list', objectType: 'Car'},
+    vans: 'Car[]'
+  }
+}
+
+let carList = person.cars
+
+// Add new cars to the list
+realm.write(() => {
+  // 列表必须要在 write 事务中处理
+  carList.push({make: 'Honda', model: 'Accord', miles: 100});
+  carList.push({make: 'Toyota', model: 'Prius', miles: 200});
+});
+
+let secondCar = carList[1].model;  // 通过数组下标访问
+```
+
+与其他列表和一对一关系不同，多对多关系不能是可选的。
+
+#### 反向关系
+
+::: warning 暂未翻译
+[https://realm.io/docs/javascript/latest#to-many-relationships](https://realm.io/docs/javascript/latest#to-many-relationships)
 :::
+
+### 默认属性值
+
+默认属性值可以在属性定义时通过 `default` 代号指定。要使用默认值，请在对象创建期间保留未指定的属性。
+
+```js
+const CarSchema = {
+  name: 'Car',
+  properties: {
+    make:  {type: 'string'},
+    model: {type: 'string'},
+    drive: {type: 'string', default: 'fwd'},
+    miles: {type: 'int',    default: 0}
+  }
+};
+
+realm.write(() => {
+  // 因为省略了 `miles` 因此默认为 `0`
+  // 因为 `drive` 被指定, 所以会重写默认值
+  realm.create('Car', {make: 'Honda', model: 'Accord', drive: 'awd'});
+});
+```
+
+### 索引属性
+
+你可以给属性添加 `indexed` 代号来使它可以被索引。这个操作被 `int`、`string`、`bool` 和 `date` 属性支持：
+
+```js
+var BookSchema = {
+  name: 'Book',
+  properties: {
+    name: { type: 'string', indexed: true },
+    price: 'float'
+  }
+}
+```
+
+当以较慢的插入为大家比较属性相等性时，索引属性将大大加快查询，
+
+### 主键
+
+你可以再 对象模型中给 `string`、`int` 类型的属性指定 `primaryKey` 属性。声明主键可以有效地查找和更新对象，并为每个值强制实现唯一性。一旦一个带有主键的对象被添加到 Realm，主键就不能被改变了。
+
+```js
+const BookSchema = {
+  name: 'Book',
+  primaryKey: 'id',
+  properties: {
+    id: 'int', // 主键
+    title: 'string',
+    price: 'float'
+  }
+}
+```
+
+主键属性自动被索引
 
 ## 故障排除
 
