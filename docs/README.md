@@ -204,3 +204,135 @@ Realm.open({
 - 有新功能需求？[Open an issue on our repo](https://github.com/realm/realm-js/issues/new)。告诉我们你想要的功能和为什么想要。
 
 如果你正在使用一个 **crash reporter**（比如 Crashlytics 和 HockeyApp），确保开启了日志收集。当抛出一个异常并且发生不可恢复的情况时Realm 会记录元信息（不包括用户数据），并且这些信息能够在需要时帮你调试定位问题。
+
+## Realms
+
+### 打开 Realms
+
+打开一个 Realm 只需要简单地执行 Realm 类的静态方法 `open`。你需要传递一个配置对象给 `open` 方法。我们在上面的例子中已经看到了一个包含 `schema` 的配置对象：
+
+```js
+// Get the default Realm with support for our objects
+Realm.open({schema: [Car, Person]}).then((realm) => {
+  // ...use the realm instance here
+}).catch(error => {
+  // Handle the error here if something went wrong
+})
+```
+
+关于配置对象的详细信息请查看API索引 [Configuration](http://t.cn/RelKD6G)。除了 `schema` 以外，还有一些常见的属性：
+
+- `path`：指定 [另一个Realm](http://t.cn/Rel9QKH) 的路径
+- `migration`：一个 [migration function](http://t.cn/Rel9eUJ)
+- `sync`：一个 [sync object](http://t.cn/RelCzNF)，用来同步打开一个带有 Object Server 的 Realm
+- `inMemory`：Realm 将在内存中被打开，并且对象不是永久的。一旦最后一个 Realm 实例被关闭，所有的对象都会消失
+- `deleteRealmIfMigrationNeeded`：当需要迁移时删除Realm。这在开发中很有用，因为数据模型可能经常变化
+- `schemaVersion`：指定 schema 的版本
+
+### 默认 Realm
+
+你可能已经注意到先前的所有示例中都省略了 `path` 参数。这种情况下，会使用默认的 Realm path。你可以使用全局变量 `Realm.defaultPath` 来访问和改变默认的 Realm path。
+
+### 打开一个同步的 Realm
+
+打开一个同步的Realm和打开任何一个其他的Realm是一样的。如果你需要配置同步化，你可以给 [Configuration](http://t.cn/RelKD6G) 添加一个 `sync` 属性。 `sync` 的可选属性包括：
+
+- `error`：一个处理和报告错误的回调
+- `validate_ssl`：表明是否 SSL 证书必须被验证
+- `ssl_trust_certificate_path`：一个查找可信任 SSL 证书的地址
+
+错误处理的方式是在配置中注册一个回调函数：
+
+```js
+const Dog = {
+  name: 'Dog',
+  properties: {
+    name: 'string'
+  }
+}
+const config = {
+  schema: [Dog],
+  sync: {
+    user: userA,
+    url: realmUrl,
+    error: err => {
+      console.log(err)
+    }
+  }
+}
+
+const realm = Realm.open(config).then((realm) => {
+  // ...use the realm instance here
+}).catch(error => {
+  // Handle the error here if something went wrong
+})
+```
+
+### 其他 Realm
+
+在不同的位置持有多个Realm是非常有用的。例如，你可能想要在主Realm之外打包应用的一些数据到 Realm 文件中。你可以在初始化你的 realm 时指定一个 `path` 参数。所有的 path 都是应用可写目录的相对路：
+
+```js
+// Open a realm at another path
+Realm.open({
+  path: 'anotherRealm.realm',
+  schema: [CarSchema]
+}).then(/* ... */)
+```
+
+### Schema 版本
+
+打开一个 Realm 时另一个可用的选项是 `schemaVersion`。当省略时， `schemaVersion` 属性的值默认是 `0`。当初始化一个已经存在的Realm，并且这个它的 `schema` 和之前定义的不一样，你需要指定 `schemaVersion`。如果 `schema` 被更新并且没有指定 `schemaVersion`，会抛出一个异常。
+
+```js
+const PersonSchema = {
+  name: 'Person',
+  properties: {
+    name: 'string'
+  }
+}
+// schemaVersion defaults to 0
+Realm.open({schema: [PersonSchema]})
+```
+
+如果你过了一会秀了下操作：
+
+```js
+const UpdatedPersonSchema = {
+  // schema name 相同，所以之前在Realm中的 `Person` 对象将被更新
+  name: 'Person',
+  properties: {
+    name: 'string',
+    dog: 'Dog' // new property
+  }
+}
+
+// 这里会抛出错误，因为 shema 已经被更新了，但是 `schemaVersion` 没有指定
+Realm.open({schema: [UpdatedPersonSchema]})
+
+// 这里将会成功并且更新 Realm 到新版本
+Realm.open({schema: [UpdatedPersonSchema], schemaVersion: 1})
+```
+
+如果你希望检索当前 schema 的版本，你可以使用 `Realm.schemaVersion` 方法：
+
+```js
+const currentVersion = Realm.schemaVersion(Realm.defaultPath);
+```
+
+### 同步打开 Realms
+
+你可以通过简单地调用构造函数并传入一个配置对象给它来创建一个 realm 实例。通常不推荐这样做，因为它会阻塞并且可能是耗时的操作。特别是正在运行 [Migrations](http://t.cn/Rel9eUJ) 或者 realm 实例是 [synchronized](http://t.cn/RelCzNF)，并且你不希望在数据没有完全下载好之前冒险修改它。
+
+如果你坚持这么做，语法很简单：
+
+```js
+const realm = new Realm({schema: [PersonSchema]})
+
+// You can now access the realm instance.
+realm.write(/* ... */)
+```
+
+::: warning
+如果 Realm 的 [permissions](http://t.cn/Rel13kK) 是 `read-only`，那么你必须使用异步的API来打开它。使用上面的语法打开 `read-only` Realm 将会导致错误。
+:::

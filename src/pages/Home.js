@@ -35,8 +35,8 @@ export default class Home extends Component {
             arrow="horizontal"
             onClick={() => navigation.navigate('Car')}
           >
-            Realm 中有几只狗
-            <Brief>Realm 第一个Demo</Brief>
+            有几辆车超过了1000英里
+            <Brief>Realm 第二个Demo</Brief>
           </Item>
         </List>
       </ScrollView>

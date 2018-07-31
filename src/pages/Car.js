@@ -32,7 +32,7 @@ export default class Car extends Component {
   }
 
   createCar = () => {
-    RealmHelp.write([CarSchema], (realm) => {
+    RealmHelp.write({schema: [CarSchema]}, (realm) => {
       const myCar = realm.create('Car', {
         make: '宝马',
         model: 'X3',
@@ -43,7 +43,7 @@ export default class Car extends Component {
   }
 
   queryCar = () => {
-    RealmHelp.query([CarSchema], 'Car', 'miles > 1000').then((res) => {
+    RealmHelp.query({schema: [CarSchema]}, 'Car', 'miles > 1000').then((res) => {
       Modal.alert(`超过1000英里的车子有${res.length}辆`)
     })
   }
