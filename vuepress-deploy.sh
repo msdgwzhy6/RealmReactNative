@@ -16,10 +16,17 @@ git init
 git add -A
 git commit -m 'deploy'
 
+git config --local user.name "杨俊宁"
+git config --local user.email {1003719811@qq.com}
+
 # 如果发布到 https://<USERNAME>.github.io
 # git push -f git@github.com:<USERNAME>/<USERNAME>.github.io.git master
 
 # 如果发布到 https://<USERNAME>.github.io/<REPO>
-git push -f ${access_token}@github.com:youngjuning/RealmReactNative.git master:gh-pages
+# git push -f ${access_token}@github.com:youngjuning/RealmReactNative.git master:gh-pages
 
+# 如果使用 travis 持续集成
+git push -f https://${access_token}@github.com/youngjuning/RealmReactNative.git master:gh-pages
 cd -
+
+# https://stackoverflow.com/questions/42154912/permission-denied-for-build-sh-file
