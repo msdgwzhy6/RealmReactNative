@@ -11,8 +11,8 @@ const equalArray = (arr1 = [], arr2 = []) => {
 }
 
 const init = (schema) => {
-  if (!RealmHelp.reaml) {
-    RealmHelp.realm = new Realm(schema)
+  if (!RealmHelp.realm) {
+    RealmHelp.realm = new Realm({schema})
   } else if (!equalArray(RealmHelp.realm.schema, schema)) {
     RealmHelp.realm.close()
     RealmHelp.realm = new Realm({schema})
