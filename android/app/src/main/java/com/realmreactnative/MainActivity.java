@@ -1,7 +1,6 @@
 package com.realmreactnative;
 
 import com.facebook.react.ReactActivity;
-import io.realm.react.RealmReactPackage;
 
 public class MainActivity extends ReactActivity {
 
